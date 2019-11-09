@@ -96,6 +96,6 @@ if __name__ == "__main__":
     plt.plot(X, Y)
     plt.show()
 
-    for deg in (5, 6, 7, 8, 9):
-        fit_and_display(X, Y, 10, deg)
+    for deg in (3,4,5, 6, 7, 8, 9,10):
+        fit_and_display(X, Y, 100, deg)
     plot_train_vs_test_curves(X, Y)

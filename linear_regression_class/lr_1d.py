@@ -1,55 +1,45 @@
-# shows how linear regression analysis can be applied to 1-dimensional data
-#
-# notes for this course can be found at:
-# https://deeplearningcourses.com/c/data-science-linear-regression-in-python
-# https://www.udemy.com/data-science-linear-regression-in-python
-
-from __future__ import print_function, division
-from builtins import range
-# Note: you may need to update your version of future
-# sudo pip install -U future
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-# load the data
-X = []
-Y = []
+#load data
+X_list=[]
+Y_list=[]
 for line in open('data_1d.csv'):
     x, y = line.split(',')
-    X.append(float(x))
-    Y.append(float(y))
+    X_list.append(float(x))
+    Y_list.append(float(y))
+    
+X = np.array(X_list)
+Y = np.array(Y_list)
 
-# let's turn X and Y into numpy arrays since that will be useful later
-X = np.array(X)
-Y = np.array(Y)
-
-
-# let's plot the data to see what it looks like
-plt.scatter(X, Y)
+plt.scatter(X,Y)
 plt.show()
 
+#apply equations
 
-# apply the equations we learned to calculate a and b
+#denominator = X.dot(X) - X.mean() * X.sum()
+#a = (X.dot(Y) - Y.mean() * X.sum()) / denominator
+#b = (Y.mean() * X.dot(X) - X.mean() * X.dot(Y)) / denominator
 
-# denominator is common
-# note: this could be more efficient if
-#       we only computed the sums and means once
-denominator = X.dot(X) - X.mean() * X.sum()
-a = ( X.dot(Y) - Y.mean()*X.sum() ) / denominator
-b = ( Y.mean() * X.dot(X) - X.mean() * X.dot(Y) ) / denominator
+denominator =  (X**2).mean() - X.mean()**2
 
-# let's calculate the predicted Y
+a = ((X*Y).mean() - X.mean()*Y.mean())/denominator
+b = (Y.mean()*(X**2).mean() - X.mean()*(X*Y).mean())/denominator
+
+#Calculate predicted Y
 Yhat = a*X + b
-
-# let's plot everything together to make sure it worked
-plt.scatter(X, Y)
+plt.scatter(X,Y)
 plt.plot(X, Yhat)
 plt.show()
 
-# determine how good the model is by computing the r-squared
-d1 = Y - Yhat
-d2 = Y - Y.mean()
-r2 = 1 - d1.dot(d1) / d2.dot(d2)
-print("the r-squared is:", r2)
+# Calculate R**2
+diff_res = Y - Yhat
+diff_mean = Y - Y.mean()
+
+sse_res = diff_res.dot(diff_res)
+sse_tot = diff_mean.dot(diff_mean)
+
+r_squard = 1 - (sse_res/sse_tot)
+
+print("RQuared: %f" % r_squard)
+

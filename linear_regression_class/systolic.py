@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Oct 11 17:10:10 2019
+
+@author: loganathan001
+"""
+
 # https://deeplearningcourses.com/c/data-science-linear-regression-in-python
 # need to sudo pip install xlrd to use pd.read_excel
 # data is from:
@@ -8,52 +16,49 @@
 # X2 = age in years
 # X3 = weight in pounds
 
-from __future__ import print_function, division
-from builtins import range
-# Note: you may need to update your version of future
-# sudo pip install -U future
 
-
-
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 df = pd.read_excel('mlr02.xls')
-X = df.values
+X = df.as_matrix()
 
-# using age to predict systolic blood pressure
-plt.scatter(X[:,1], X[:,0])
+plt.scatter(X[:, 1], X[:, 0])
 plt.show()
-# looks pretty linear!
 
-# using weight to predict systolic blood pressure
-plt.scatter(X[:,2], X[:,0])
+plt.scatter(X[:, 2], X[:, 0])
 plt.show()
-# looks pretty linear!
 
 df['ones'] = 1
+X = df[['X2','X3','ones']]
 Y = df['X1']
-X = df[['X2', 'X3', 'ones']]
-X2only = df[['X2', 'ones']]
-X3only = df[['X3', 'ones']]
 
-def get_r2(X, Y):
-    w = np.linalg.solve( X.T.dot(X), X.T.dot(Y) )
+X2Only = df[['X2', 'ones']]
+X3Only = df[['X3', 'ones']]
+
+def get_rsquared(X, Y):
+    w = np.linalg.solve(X.T.dot(X), X.T.dot(Y))
     Yhat = X.dot(w)
+    diff_res = Y - Yhat
+    diff_mean = Y - Y.mean()
+    
+    sse_res = diff_res.dot(diff_res)
+    sse_tot = diff_mean.dot(diff_mean)
 
-    # determine how good the model is by computing the r-squared
-    d1 = Y - Yhat
-    d2 = Y - Y.mean()
-    r2 = 1 - d1.dot(d1) / d2.dot(d2)
-    return r2
+    r_squard = 1 - (sse_res/sse_tot)
+    return r_squard
 
-print("r2 for x2 only:", get_r2(X2only, Y))
-print("r2 for x3 only:", get_r2(X3only, Y))
-print("r2 for both:", get_r2(X, Y))
+print('RSquared for X2 only', get_rsquared(X2Only, Y))
+print('RSquared for X3 only', get_rsquared(X3Only, Y))
+print('RSquared for both', get_rsquared(X, Y))
 
+#random noise in x
+np.random.seed(100)
+df['random'] = np.random.randint(1,101, size=df.shape[0])
+XNoise = df[['X2','X3']].sort_values(axis=0,by=['X2'])
+XNoise['random'] = df['random']
 
-
-
+print('RSquared for X with random noise', get_rsquared(XNoise, Y))
 
 

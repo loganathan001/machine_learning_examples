@@ -1,69 +1,72 @@
-# shows how linear regression analysis can be applied to moore's law
-#
-# notes for this course can be found at:
-# https://deeplearningcourses.com/c/data-science-linear-regression-in-python
-# https://www.udemy.com/data-science-linear-regression-in-python
-# transistor count from: https://en.wikipedia.org/wiki/Transistor_count
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Oct 10 17:07:39 2019
 
-from __future__ import print_function, division
-from builtins import range
-# Note: you may need to update your version of future
-# sudo pip install -U future
-
+@author: loganathan001
+"""
 
 import re
 import numpy as np
 import matplotlib.pyplot as plt
 
-X = []
-Y = []
+X=[]
+Y=[]
 
-# some numbers show up as 1,170,000,000 (commas)
-# some numbers have references in square brackets after them
 non_decimal = re.compile(r'[^\d]+')
 
 for line in open('moore.csv'):
     r = line.split('\t')
-
+    
     x = int(non_decimal.sub('', r[2].split('[')[0]))
     y = int(non_decimal.sub('', r[1].split('[')[0]))
+    
     X.append(x)
     Y.append(y)
-
-
+    
 X = np.array(X)
 Y = np.array(Y)
 
-plt.scatter(X, Y)
+plt.scatter(X,Y)
 plt.show()
 
 Y = np.log(Y)
-plt.scatter(X, Y)
+plt.scatter(X,Y)
 plt.show()
 
-# copied from lr_1d.py
-denominator = X.dot(X) - X.mean() * X.sum()
-a = ( X.dot(Y) - Y.mean()*X.sum() ) / denominator
-b = ( Y.mean() * X.dot(X) - X.mean() * X.dot(Y) ) / denominator
+denominator =  (X**2).mean() - X.mean()**2
 
-# let's calculate the predicted Y
+a = ((X*Y).mean() - X.mean()*Y.mean())/denominator
+b = (Y.mean()*(X**2).mean() - X.mean()*(X*Y).mean())/denominator
+
 Yhat = a*X + b
 
-plt.scatter(X, Y)
+plt.scatter(X,Y)
 plt.plot(X, Yhat)
 plt.show()
 
-# determine how good the model is by computing the r-squared
-d1 = Y - Yhat
-d2 = Y - Y.mean()
-r2 = 1 - d1.dot(d1) / d2.dot(d2)
-print("a:", a, "b:", b)
-print("the r-squared is:", r2)
+# Calculate R**2
+diff_res = Y - Yhat
+diff_mean = Y - Y.mean()
 
-# how long does it take to double?
-# log(transistorcount) = a*year + b
-# transistorcount = exp(b) * exp(a*year)
-# 2*transistorcount = 2 * exp(b) * exp(a*year) = exp(ln(2)) * exp(b) * exp(a * year) = exp(b) * exp(a * year + ln(2))
-# a*year2 = a*year1 + ln2
-# year2 = year1 + ln2/a
-print("time to double:", np.log(2)/a, "years")
+sse_res = diff_res.dot(diff_res)
+sse_tot = diff_mean.dot(diff_mean)
+
+r_squard = 1 - (sse_res/sse_tot)
+
+print('a', a, 'b', b)
+print("RQuared: %f" % r_squard)
+
+
+#log(transister_count) = a*year + b
+#  transister_count = exp(a*year) * exp(b)
+# 2 * transister_count  = 2 * exp(a*year) * exp(b)
+#                       = exp(ln(2)) * exp(a*Xyear * exp(b)
+#                       = exp(a*year + ln(2)) * exp(b)
+#year2 -> the year to double
+#  exp(a*year2) * exp(b) = exp(a*year1 + ln(2)) * exp(b)
+#  a*year2 = a*year1 + ln(2)
+#  year2 = year1 + ln(2)/a
+#  time_to_doauble = year2 - year1 = ln(2)/a
+#
+print("time to double" , np.log(2)/a)
